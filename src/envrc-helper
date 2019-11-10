@@ -1,0 +1,113 @@
+#!/bin/bash
+
+if [ -d .git ]; then
+  echo "execute this command in a git repository root."
+  exit 1
+fi
+
+# --------------------------------
+# // MARK: Functions
+function find_variable() {
+  variable_name=$1
+  file_name=$2
+
+  grep ^$1= $file_name > /dev/null
+}
+
+function remove_variable() {
+  variable_name=$1
+  file_name=$2
+
+  new_lines=$(sed /^$variable_name=/d $file_name)
+  echo -ne "$new_lines" > $file_name
+}
+
+function ends_with_newline() {
+  file_name=$1
+
+  if [ $(tail -1 $file_name | wc -l) -eq 1 ];then
+    true
+  else
+    false
+  fi
+}
+
+command=$1
+
+if [ "$command" = "init" ]; then
+  # --------------------------------
+  # // MARK: init
+
+  # .envrcの作成
+  if [ -e .envrc ]; then
+    touch .envrc
+    direnv allow
+    echo "created .envrc"
+  fi
+
+  # .envrc.templateの作成
+  if [ -e .envrc.template ]; then
+    touch .envrc.template
+    cat ~/.envrc.default > .envrc.template
+    echo "created .envrc.template"
+  fi
+
+  # .gitignoreへの追記
+  cat .gitignore | grep ^.envrc$
+  if [ $? -ne 0 ]; then
+    echo .envrc >> .gitignore
+  fi
+
+elif [ "$command" = "add" ]; then
+  # --------------------------------
+  # // MARK: add
+
+  variable_name=$2
+  variable_value=$3
+
+  find_variable $variable_name .envrc
+  if [ $? -eq 0 ]; then
+    echo "$variable_name already exists in the .envrc"
+  else
+    if ! ends_with_newline .envrc; then
+      echo -e "" >> .envrc
+    fi
+
+    echo "$variable_name=$variable_value" >> .envrc
+
+    direnv allow
+  fi
+
+  find_variable $variable_name .envrc.template
+  if [ $? -eq 0 ]; then
+    echo "$variable_name already exists in the .envrc.template"
+  else
+    if ! ends_with_newline .envrc.template; then
+      echo -e "" >> .envrc.template
+    fi
+
+    echo "$variable_name=" >> .envrc.template
+  fi
+
+elif [ "$command" = "remove" ]; then
+  # --------------------------------
+  # // MARK: remove
+
+  variable_name=$2
+
+  remove_variable $variable_name .envrc
+  remove_variable $variable_name .envrc.template
+
+  direnv allow
+
+elif [ "$command" = "create" ]; then
+
+
+  cp .envrc.template .envrc
+
+else
+
+  echo "unknown command: \"$command\""
+  exit 1
+
+fi
