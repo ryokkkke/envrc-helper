@@ -1,25 +1,27 @@
 # envrc-helper
 
-envrc-helper is a usefull command for user of direnv.
-envrc-helper makes it easy that creates/updates `.envrc` and `.envrc.template`.
+envrc-helperはdirenvを使う際に便利なコマンドです。
+envrc-helperは`.envrc`と`.envrc.template`を管理します。
 
 # What is .envrc.template?
 
-`.envrc` file is usually in a `.gitignore` because it has secret values that we shouldn't push to remote repositories.
-You can push `.envrc.template` instead because it has only environment variable names, like below.
+`.envrc`は大体の場合、リモートレポジトリにプッシュ出来ないような秘密の値を持つため、`.gitignore`の中に書きます。
+ただそうすると新しくそのレポジトリに参加した人が、開発に必要な環境変数をコードだけから知ることが出来ません。
+
+それを防ぐために、下記のように`.envrc.template`に環境変数名だけを書いておけば、このファイルはリモートレポジトリにプッシュ可能です。
 
 ```.envrc.template
 export SECRET_VARIABLE=
 export OTHER_VARIABLE=
 ```
 
-Developers that are new to a repository can easily grasp environment variables that development of the repository needs by `.envrc.template`.
+これは勝手にenvrc-helperが作るファイルなので、direnvそのものとは何も関係はありません。
 
 # Installation
 
-Actually envrc-helper is a simple bash shellscript and depends on no special commands or packages excluding direnv.
-
-Copy `src/envrc-helper` into a directory in $PATH, and you'll be able to use it.
+envrc-helperは純粋なbashシェルスクリプトで、特別なコマンドなどは使用していません。
+（`direnv allow`は叩いています。）
+なので、お好きなディレクトリに`src/envrc-helper`を置いてパスが通っていれば使えます。
 
 # Usage
 
@@ -43,8 +45,7 @@ envrc-helper usage:
 
 ## ~/.envrc.default
 
-If `~/.envrc.default` exists, `envrc-helper` copies it when creating `.envrc.template`.
-Create it if you want to let `.envrc` have default common environment variables.
+`~/.envrc.default`が存在する場合は、`.envrc`と`.envrc.template`を作る時にそれをコピーして作ります。
 
 
 ## Examples
@@ -67,7 +68,7 @@ direnv: export +SECRET_VARIABLE
 $ cat .envrc
 export SECRET_VARIABLE=secret-value
 
-# oops, misspelling...
+# スペルミスったりしてもremoveで楽に消せます
 $ envrc-helper add OTHER_VARIABL value
 direnv: loading .envrc
 direnv: export +SECRET_VARIABLE +OTHER_VARIABL
