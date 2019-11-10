@@ -10,9 +10,13 @@ fi
 function show_usage() {
   cat << EOS
 envrc-helper usage:
+
     envrc-helper COMMAND [ARGUMENTS ...]
 
+    execute this command in a git repository root.
+
     COMMAND and ARGUMENTS:
+
         init: creates .envrc file and .envrc.template file and creates/updates .gitignore file.
 
         add NAME VALUE: adds NAME as an environment variable to .envrc and .envrc.template.
@@ -64,14 +68,17 @@ if [ "$command" = "init" ]; then
   # --------------------------------
   # // MARK: init
 
-  # .envrcの作成
+  # creates .envrc
   if [ ! -e .envrc ]; then
     touch .envrc
+    if [ -e ~/.envrc.default ]; then
+      cat ~/.envrc.default > .envrc.template
+    fi
     direnv allow
     echo "created .envrc"
   fi
 
-  # .envrc.templateの作成
+  # creates .envrc.template
   if [ ! -e .envrc.template ]; then
     touch .envrc.template
     if [ -e ~/.envrc.default ]; then
@@ -80,7 +87,7 @@ if [ "$command" = "init" ]; then
     echo "created .envrc.template"
   fi
 
-  # .gitignoreへの追記
+  # add lines to .gitignore
   cat .gitignore 2>/dev/null | grep ^.envrc$ > /dev/null
   if [ $? -ne 0 ]; then
     echo -e "\n.envrc" >> .gitignore
