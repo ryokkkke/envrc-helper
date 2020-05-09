@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ ! -d .git ]; then
-  echo "execute this command in a git repository root."
-  exit 1
-fi
-
 # --------------------------------
 # // MARK: Functions
 function show_usage() {
